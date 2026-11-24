@@ -69,7 +69,7 @@ class AlertMonitor(mainConfig):
         if use_push:
             print("Push notifications enabled. Registering Gmail watch...")
             self.alertbroker.setup_push()
-            print("Gmail watch registered. Polling Pub/Sub every %d s." % push_poll_interval)
+            print("Gmail watch registered. Polling Pub/Sub every %.1f s." % push_poll_interval)
 
         # Start shared observation-monitoring thread for all pending alerts
         pending_monitor = threading.Thread(
