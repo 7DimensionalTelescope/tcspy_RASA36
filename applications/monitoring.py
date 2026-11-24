@@ -27,7 +27,7 @@ class _TeeOutput:
 
     def _log_path(self):
         # Use the same -12 h offset as mainLogger so night logs stay on one date
-        date_str = (datetime.datetime.utcnow() - datetime.timedelta(hours=12)).strftime('%Y%m%d')
+        date_str = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=12)).strftime('%Y%m%d')
         return os.path.join(LOG_DIR, f'{date_str}_monitoring.log')
 
     def _open_file(self):
