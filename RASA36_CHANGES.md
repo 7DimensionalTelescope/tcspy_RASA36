@@ -69,8 +69,8 @@ depend on: the **focuser** (now driven through NINA), the **Target-of-Opportunit
 
 ## 4. NINA Focuser Integration *(new capability)*
 
-RASA36's focuser is controlled through PlaneWave's NINA application rather than
-ASCOM/PWI4, so a complete NINA control path was added:
+RASA36's focuser is controlled through NINA (Nighttime Imaging 'N' Astronomy)
+rather than ASCOM/PWI4, so a complete NINA control path was added:
 
 - **`devices/nina_client.py` (new):** a thin HTTP client for the NINA Advanced
   API (`/v2/api/equipment/focuser`, port 1888) — connect, move, info, and
@@ -140,7 +140,7 @@ of periodic mailbox polling.
   - `_post_night_summary()` — assemble and publish the end-of-night report.
 - **New pipeline stages:** `run_db_dynamic()` (refresh the nightly target DB) and
   `run_data_transfer()` (kick off archive transfer) as schedulable steps.
-- **Operational robustness:** `dummy_run()` dry-run mode and a SIGINT handler
+- **Operational robustness:** a SIGINT handler
   (`_sigint_handler`) for graceful interruption.
 
 ---

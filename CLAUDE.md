@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Project Is
 
-TCSpy (Telescope Control System with Python) is an astronomical observatory control system for managing multiple telescopes via network-based communication. It controls ASCOM Alpaca devices (camera, filter wheel, focuser, mount) and optionally PWI4 (PlaneWave) or NINA-based devices. The current branch (`RASA36`) is customized for a single RASA36 telescope instrument with `unitnum=36`: camera via Alpaca, mount via PWI4, focuser via NINA. See `RASA36_CHANGES.md` for a detailed summary of how this branch diverges from the upstream 7DT-array codebase.
+TCSpy (Telescope Control System with Python) is an astronomical observatory control system for managing multiple telescopes via network-based communication. It controls ASCOM Alpaca devices (camera, filter wheel, focuser, mount) and optionally PWI4 (PlaneWave) or NINA-based devices. This repository is customized for a single RASA36 telescope instrument with `unitnum=36`: camera via Alpaca, mount via PWI4, focuser via NINA. See `RASA36_CHANGES.md` for a detailed summary of how this branch diverges from the upstream 7DT-array codebase.
 
 The system runs on a Main Control System (MCS) computer that coordinates Telescope Control System (TCS) computers, each connected to a physical telescope over a local network.
 
@@ -100,7 +100,7 @@ High-level nightly operations orchestrated by `AppScheduler`:
 - `Startup` / `Shutdown` — telescope connect, cool, home, park sequences.
 - `BiasAcquisition`, `DarkAcquisition`, `FlatAcquisition` — calibration frame pipelines.
 - `NightObservation` — the main nightly loop: consumes targets from the DB, dispatches observations, monitors weather, and handles ToO interrupts including a rapid-ToO path (`_rapidToOobservation`) that preempts the regular survey cadence.
-- `AppScheduler` — top-level scheduler that sequences the nightly pipeline using the `schedule` library. Also refreshes the nightly DB (`run_db_dynamic`), kicks off archive transfer (`run_data_transfer`), and posts an end-of-night Slack report (sample images + sky-coverage plot). Has a `dummy_run()` dry-run mode for testing the schedule without hardware.
+- `AppScheduler` — top-level scheduler that sequences the nightly pipeline using the `schedule` library. Also refreshes the nightly DB (`run_db_dynamic`), kicks off archive transfer (`run_data_transfer`), and posts an end-of-night Slack report (sample images + sky-coverage plot).
 - `monitoring.py` — standalone background process: runs `AlertMonitor` (Gmail → Slack ToO pipeline) and `DataTransferManager` in daemon threads.
 
 ### Utility Layer (`utils/`)
@@ -108,7 +108,7 @@ High-level nightly operations orchestrated by `AppScheduler`:
 - `databases/` — `DB` wraps `DB_Dynamic` (nightly MySQL target table, scored per target) and `DB_Annual` (static TOS table). `DB_Dynamic` connects via `SQLConnector` to MySQL.
 - `target/` — `SingleTarget` and `MultiTargets`: wrap astroplan/astropy for observability scoring, rise/set/transit times, altitude constraints, moon separation.
 - `alertmanager/` — `AlertBroker` + `AlertMonitor`: receive ToO alert mail via the Gmail API with Google Cloud Pub/Sub push notifications (near-real-time, not polling), parse alerts, post to Slack, and inject targets into `DB_Dynamic`. `AlertMonitor` gates dispatch on observability (`_is_safe()`, `_is_nighttime()`) and queues pending alerts for a valid observing window.
-- `connector/` — `SlackConnector`, `GmailConnector` (Gmail API service + Pub/Sub watch renewal), `SQLConnector` (MySQL via `mysql_connector_repackaged`, with bulk operations `execute_many` / `bulk_update_rows`).
+- `connector/` — `SlackConnector`, `GmailConnector` (Gmail API service + Pub/Sub watch renewal), `SQLConnector` (MySQL via `mysql-connector-python`, with bulk operations `execute_many` / `bulk_update_rows`).
 - `logger/mainLogger` — file-based rotating logger, inherits `mainConfig`, used throughout actions and applications.
 - `error/` — device-layer exceptions (e.g., `FocuserTypeError`, `DBConnectionError`).
 - `exception/` — action-layer exceptions (e.g., `AbortionException`, `ExposureFailedException`, `AutofocusFailedException`, `DeviceNotReadyException`). All action `.run()` methods raise these on failure and store them in `shared_memory['exception']`.
@@ -144,7 +144,7 @@ There is no test suite, and the real test happens at night on live hardware — 
 3. **Config keys**: if you added/renamed a config key, confirm it loads:
    `python -c "from tcspy.configuration import mainConfig; c = mainConfig(unitnum=36).config; print(c['<KEY>'])"`
 4. **Call sites**: before changing any function signature or renaming anything, `grep -rn` every call site across the repo and update all of them in the same change.
-5. **Scheduler changes**: run `AppScheduler.dummy_run()` — it exercises the nightly schedule without hardware.
+5. **Scheduler changes**: there is no dry-run mode (`AppScheduler.dummy_run()` only prints a line). Check imports and call sites offline, then confirm the schedule with the operator in daytime.
 6. **ToO/alert-path changes**: inject a fake alert without Gmail via `AlertBroker.read_tbl` + `AlertMonitor.trigger_alert` (see the `test-too` skill). Never test through the live DB on an observing night.
 7. **Performance claims**: measure with a scratchpad micro-benchmark; don't assert speedups you didn't time.
 
