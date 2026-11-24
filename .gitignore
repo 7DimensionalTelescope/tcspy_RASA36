@@ -1,0 +1,36 @@
+# Byte-compiled / optimized / DLL files
+**/*.pyc
+**/__pycache__/
+
+# Jupyter Notebook
+*.ipynb
+**/.ipynb_checkpoints/
+
+# Other tools
+.codegpt/
+
+# text
+*safemonitor*.txt
+
+# keys
+*/keys/
+
+# local/runtime artifacts
+.claude/
+utils/alert_history/
+
+# generated or unrelated files
+.DS_Store
+*.egg-info/
+matched_tiles_*.png
+**/~/
+utils/.tar
+utils/alertmanager/gmail/
+applications/tmp.py
+
+# tile tables of other telescopes
+utils/databases/tileinfo/7-DT/
+utils/databases/tileinfo/CBNUO/
+utils/databases/tileinfo/KCT/
+utils/databases/tileinfo/KMTNet/
+utils/databases/tileinfo/KMTNet-ks4/
